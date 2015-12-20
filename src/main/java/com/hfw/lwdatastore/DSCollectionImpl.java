@@ -14,13 +14,23 @@ import java.util.Set;
  */
 public class DSCollectionImpl implements DSCollection {
     
-    private Set keyIndex;
+    private Set<String> keyIndex;
     private Map<String,Set<IndexObject>> indexes;
     private CollectionDescription collectionDescription;
     
     public DSCollectionImpl(CollectionDescription collectionDescription) {
         this.collectionDescription = collectionDescription;
     }
+    
+    @Override
+    public Set<String> getKeyIndex() {
+        return this.keyIndex;
+    }
+    @Override
+    public Set<IndexObject> getIndex(String name) {
+        return indexes.get(name);
+    }
+    
     @Override
     public String putObject(Object obj) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.

@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonProcessingException;
@@ -98,15 +99,23 @@ public class LWDataStoreFactory {
     }
 
     private void writeIndexFile(DSCollection collection, String dataDir) {
-        File file = new File(dataDir + File.separator + collection.getCollectionDescription().getName() + ".idx");
-
+        String fileName = dataDir + File.separator + collection.getCollectionDescription().getName() + ".idx";
+        
+        HashMap<String, Object> indexMap = new HashMap<String, Object>();
+        indexMap.put("_primaryKey", collection.getKeyIndex());
+        
+        for (String keyName:collection.getCollectionDescription().getIndexedAttributes()){
+            Set<IndexObject> index = collection.getIndex(keyName);
+            indexMap.put(keyName, index);
+        }
+        this.writeJsonFile(indexMap, fileName);
     }
 
-    public static void saveToConfig(Object config,String fileName) {
+    private void writeJsonFile(Object config,String fileName) {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonFactory factory = new JsonFactory();
         HashMap<String, Object> hashMap = new HashMap<String, Object>();
-        hashMap.put("repository", config);
+        hashMap.put("indexSet", config);
         JsonNode jsonNode = objectMapper.valueToTree(hashMap);
         try {
             objectMapper.writeValue(new File(fileName), jsonNode);

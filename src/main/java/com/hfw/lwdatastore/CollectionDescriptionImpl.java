@@ -18,6 +18,7 @@ public class CollectionDescriptionImpl implements CollectionDescription{
     private List<String> attributes;
     private List<String> indexedAttributes;
     private String idAttribute;
+    private String classReference;
     
     public CollectionDescriptionImpl() {
         
