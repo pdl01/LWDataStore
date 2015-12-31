@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.hfw.lwdatastore;
+package com.hf.lwdatastore;
 
 import java.util.ArrayList;
 import java.util.HashMap;

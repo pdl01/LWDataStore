@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.hfw.lwdatastore;
+package com.hf.lwdatastore;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,7 +24,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 public class LWDataStoreFactory {
 
     private static DataStore dataStore = null;
-
+    private DiskSyncronizer synchronizer;
     public void init() {
 
         //build
@@ -36,11 +36,28 @@ public class LWDataStoreFactory {
             initDataStore(dsConfig);
         }
         //kick off a sychronizer thread
+        synchronizer = new DiskSyncronizer();
+        synchronizer.setDataStore(dataStore);
+        synchronizer.setDataStoreConfig(dsConfig);
+        Thread thread = new Thread(synchronizer);
+        thread.start();
 
     }
-
+    public void shutdown() {
+        synchronizer.doWork();
+        //
+    }
+    public static DataStore getDataStore(){
+        return LWDataStoreFactory.dataStore;
+    }
+    
     private void initDataStore(DataStoreConfig dsConfig) {
         dataStore = new DataStoreImpl();
+        
+        File dataDir = new File(dsConfig.getDataDir());
+        if (!dataDir.exists()) {
+            dataDir.mkdirs();
+        }
         //load the data for all known collectionNames
         List<CollectionDescription> collectionDescriptions = dsConfig.getCollections();
         if (collectionDescriptions != null) {
@@ -49,8 +66,11 @@ public class LWDataStoreFactory {
                 dataStore.createCollection(c.getName(), c, null);
                 DSCollection collection = dataStore.getCollection(c.getName());
 
+                //load the data file
+                this.readDataFile(collection, dsConfig.getDataDir());
+                //do we need to load the index file
                 //load the index file
-                //load the data file\
+                
             }
         }
 
@@ -96,32 +116,45 @@ public class LWDataStoreFactory {
 
     private void readDataFile(DSCollection collection, String dataDir) {
         File file = new File(dataDir + File.separator + collection.getCollectionDescription().getName() + ".data");
-    }
-
-    private void writeIndexFile(DSCollection collection, String dataDir) {
-        String fileName = dataDir + File.separator + collection.getCollectionDescription().getName() + ".idx";
-        
-        HashMap<String, Object> indexMap = new HashMap<String, Object>();
-        indexMap.put("_primaryKey", collection.getKeyIndex());
-        
-        for (String keyName:collection.getCollectionDescription().getIndexedAttributes()){
-            Set<IndexObject> index = collection.getIndex(keyName);
-            indexMap.put(keyName, index);
-        }
-        this.writeJsonFile(indexMap, fileName);
-    }
-
-    private void writeJsonFile(Object config,String fileName) {
-        ObjectMapper objectMapper = new ObjectMapper();
+        if (file.exists() && file.canRead()) {
         JsonFactory factory = new JsonFactory();
-        HashMap<String, Object> hashMap = new HashMap<String, Object>();
-        hashMap.put("indexSet", config);
-        JsonNode jsonNode = objectMapper.valueToTree(hashMap);
+        ObjectMapper mapper = new ObjectMapper(factory);
         try {
-            objectMapper.writeValue(new File(fileName), jsonNode);
-        } catch (IOException ex) {
-            ex.printStackTrace();
+            
+            
+            JsonNode rootNode = mapper.readTree(file);
+            List<JsonNode> dataEntries = rootNode.findValues("_data");
+            
+            Iterator<Map.Entry<String, JsonNode>> fields = rootNode.getFields();
+            while (fields.hasNext()) {
+                Map.Entry<String, JsonNode> field = fields.next();
+                if (field.getKey().equals("_data")) {
+
+                    Iterator<Map.Entry<String, JsonNode>> data_entries = field.getValue().getFields();
+                    while (data_entries.hasNext()) {
+                        Map.Entry<String, JsonNode> dataEntry = data_entries.next();
+                        
+                        Object obj = collection.getCollectionDescription().getConverter().convertFromJSONNode(dataEntry);
+                        CollectionObject cObj = new CollectionObject();
+                        cObj.setTarget(obj);
+                        collection.putObject(cObj, collection.getCollectionDescription().getConverter());
+                    }
+                }
+            }
+            
+            
+        } catch (JsonProcessingException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
 
+            
+            
+        }
     }
+
+
 }

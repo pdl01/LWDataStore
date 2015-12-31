@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.hfw.lwdatastore;
+package com.hf.lwdatastore;
 
+import com.hf.lwdatastore.exception.CollectionNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -28,32 +29,45 @@ public class DataStoreImpl implements DataStore{
     }
 
     @Override
-    public String putObject(String collectionName, Object obj) {
+    public String putObject(String collectionName, CollectionObject obj,CollectionObjectConverter converter) throws CollectionNotFoundException{
+        if (this.collections.containsKey(collectionName)) {
+            this.collections.get(collectionName).putObject(obj,converter);                
+        } else {
+            throw new CollectionNotFoundException();
+        }
+
+        return "";
+    }
+    
+    
+    @Override
+    public String[] putObjects(String collectionName, CollectionObject... objs) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public String[] putObjects(String collectionName, Object... objs) {
+    public CollectionObject getObject(String collectionName, String key) throws CollectionNotFoundException {
+        if (this.collections.containsKey(collectionName)) {
+            CollectionObject cObject = this.collections.get(collectionName).getObject(key);                
+            return cObject;
+        } else {
+            throw new CollectionNotFoundException();
+        }
+
+    }
+
+    @Override
+    public CollectionObject[] getObjects(String collectionName, String... keys) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public Object getObject(String collectionName, String key) {
+    public CollectionObject removeObject(String collectionName, String key) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public Object[] getObjects(String collectionName, String... keys) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public Object removeObject(String collectionName, String key) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public Object[] removeObjects(String collectionName, String... keys) {
+    public CollectionObject[] removeObjects(String collectionName, String... keys) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -61,7 +75,10 @@ public class DataStoreImpl implements DataStore{
     public void synchronize() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-
+    @Override
+    public void shutdown() {
+        this.synchronize();
+    }
     @Override
     public DSCollection getCollection(String collectionName) {
         return this.collections.get(collectionName);

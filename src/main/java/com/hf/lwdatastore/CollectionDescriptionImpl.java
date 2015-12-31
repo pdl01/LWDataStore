@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.hfw.lwdatastore;
+package com.hf.lwdatastore;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -19,6 +20,7 @@ public class CollectionDescriptionImpl implements CollectionDescription{
     private List<String> indexedAttributes;
     private String idAttribute;
     private String classReference;
+    private CollectionObjectConverter converter;
     
     public CollectionDescriptionImpl() {
         
@@ -49,6 +51,43 @@ public class CollectionDescriptionImpl implements CollectionDescription{
     @Override
     public List<String> getIndexedAttributes() {
         return indexedAttributes;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setAttributes(List<String> attributes) {
+        this.attributes = attributes;
+    }
+
+    public void setIndexedAttributes(List<String> indexedAttributes) {
+        this.indexedAttributes = indexedAttributes;
+    }
+
+    public void setIdAttribute(String idAttribute) {
+        this.idAttribute = idAttribute;
+    }
+    public void addIndexedAttribute(String indexedAttribute) {
+        if (this.indexedAttributes == null) {
+            this.indexedAttributes = new ArrayList<String>();
+        }
+        this.indexedAttributes.add(indexedAttribute);
+    }
+    public void addAttribute(String attribute) {
+        if (this.attributes == null) {
+            this.attributes = new ArrayList<String>();
+        }
+        this.attributes.add("attribute");
+    }
+
+    @Override
+    public CollectionObjectConverter getConverter() {
+        return this.converter;
+    }
+
+    public void setConverter(CollectionObjectConverter converter) {
+        this.converter = converter;
     }
     
 }

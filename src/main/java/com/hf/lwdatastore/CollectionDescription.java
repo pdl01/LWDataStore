@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.hfw.lwdatastore;
+package com.hf.lwdatastore;
 
 import java.util.List;
 
@@ -16,4 +16,5 @@ public interface CollectionDescription {
     public List<String> getAttributes();
     public String getIDAttribute();
     public List<String> getIndexedAttributes();
+    public CollectionObjectConverter getConverter();
 }

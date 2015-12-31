@@ -3,12 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.hfw.lwdatastore;
+package com.hf.lwdatastore.exception;
 
 /**
  *
  * @author pldorrell
  */
-public interface Record {
+public class CollectionNotFoundException extends Exception{
     
 }
