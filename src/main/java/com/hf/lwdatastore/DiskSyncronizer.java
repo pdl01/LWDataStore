@@ -5,8 +5,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -17,6 +16,7 @@ import org.codehaus.jackson.map.ObjectMapper;
  */
 public class DiskSyncronizer implements Runnable {
 
+    private static final Logger log = Logger.getLogger(DiskSyncronizer.class);
     private DataStore dataStore;
     private DataStoreConfig dataStoreConfig;
 
@@ -37,11 +37,12 @@ public class DiskSyncronizer implements Runnable {
         try {
             while (true) {
                 try {
-                    System.out.println("start of loop");
+                    log.debug("start of loop");
                     this.doWork();
                     Thread.sleep(5000);
-                    System.out.println("after sleep");
+                    log.debug("after sleep");
                 } catch (InterruptedException ex) {
+                    log.error("Interuptted while doing work", ex);
                     System.out.println(ex);
                 }
             }
@@ -51,18 +52,22 @@ public class DiskSyncronizer implements Runnable {
 
     }
 
-    public void doWork() {
+    public synchronized void doWork() {
+        log.debug("Entering doWork");
         for (CollectionDescription coll : dataStoreConfig.getCollections()) {
             DSCollection dsCollection = dataStore.getCollection(coll.getName());
+            log.debug(coll.getName()+":"+dsCollection.isDirty());
             if (dsCollection != null && dsCollection.isDirty()) {
                 this.writeIndexFile(dsCollection, this.dataStoreConfig.getDataDir());
                 this.writeDataFile(dsCollection, this.dataStoreConfig.getDataDir());
             }
         }
+        log.debug("Exiting doWork");
 
     }
 
     private void writeIndexFile(DSCollection collection, String dataDir) {
+        log.debug("Entering writeIndexFile");
         String fileName = dataDir + File.separator + collection.getCollectionDescription().getName() + ".idx";
 
         HashMap<String, Object> indexMap = new HashMap<String, Object>();
@@ -73,35 +78,45 @@ public class DiskSyncronizer implements Runnable {
             indexMap.put(keyName, index);
         }
         this.writeJsonFile("_indexSet", indexMap, fileName);
+        log.debug("Exiting writeIndexFile");
     }
 
     private void writeDataFile(DSCollection collection, String dataDir) {
+        log.debug("Entering writeDataFile");
         String fileName = dataDir + File.separator + collection.getCollectionDescription().getName() + ".data";
 
         this.writeJsonFile("_data", collection.getData(), fileName);
+        log.debug("Exiting writeDataFile");
     }
 
     private void writeJsonFile(String rootElement, Object config, String fileName) {
+        log.debug("Entering writeJsonFile");
         File outputFile = new File(fileName);
         if (!outputFile.exists()) {
             try {
                 outputFile.createNewFile();
             } catch (IOException ex) {
-                Logger.getLogger(DiskSyncronizer.class.getName()).log(Level.SEVERE, null, ex);
+                log.warn("IOExcption encountered", ex);
             }
 
         }
+        log.debug("Writing "+outputFile.getName());
         ObjectMapper objectMapper = new ObjectMapper();
         JsonFactory factory = new JsonFactory();
         HashMap<String, Object> hashMap = new HashMap<String, Object>();
         hashMap.put(rootElement, config);
-        JsonNode jsonNode = objectMapper.valueToTree(hashMap);
+        log.debug("Object:"+config);
+        
         try {
+            JsonNode jsonNode = objectMapper.valueToTree(hashMap);
+            log.debug(jsonNode);
             objectMapper.writeValue(outputFile, jsonNode);
         } catch (IOException ex) {
-            ex.printStackTrace();
+            log.error(ex);
+        } catch (Exception e) {
+            log.error("Error in writing out jsonNode", e);
         }
-
+        log.debug("Exiting writeJSONFile");
     }
 
 }

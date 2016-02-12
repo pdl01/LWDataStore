@@ -74,12 +74,12 @@ public class SaveTest extends LWDataStoreTest{
             obj = new CollectionObject();
             obj.setTarget(new TestObject("3","44","y"));
             dataStore.putObject("testObject", obj,new TestObjectConverter());
-            try {
-                Thread.sleep(100000);
-            } catch (InterruptedException ex) {
-                Logger.getLogger(SaveTest.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            //TODO: should shutdown datastore-not factory
+            //try {
+                //Thread.sleep(100000);
+            //} catch (Interru/ptedException ex) {
+            //    Logger.getLogger(SaveTest.class.getName()).log(Level.SEVERE, null, ex);
+            //}
+            //TODO: should   shutdown datastore-not factory
             //factory.shutdown();
             
             

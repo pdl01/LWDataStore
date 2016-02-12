@@ -13,9 +13,11 @@ import org.codehaus.jackson.JsonNode;
  *
  * @author pldorrell
  */
+
 public interface CollectionObjectConverter<K> {
     public CollectionObject convertToCollectionObject(K k);
     public K convertFromCollectionObject(CollectionObject object);
     public String getValue(K k,String attribute) throws AttributeNotFoundException;
     public K convertFromJSONNode(Map.Entry<String, JsonNode> jsonNode);
+    public CollectionObject setId(CollectionObject collectionObject, String _id);
 }

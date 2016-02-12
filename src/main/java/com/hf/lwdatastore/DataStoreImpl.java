@@ -6,7 +6,9 @@
 package com.hf.lwdatastore;
 
 import com.hf.lwdatastore.exception.CollectionNotFoundException;
+import com.hf.lwdatastore.exception.IndexNotFoundException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -17,7 +19,17 @@ import java.util.Properties;
 public class DataStoreImpl implements DataStore{
     private Map<String,DSCollection> collections;
     
+    private static DataStoreImpl instance  = null;
+    protected DataStoreImpl () {
+        
+    }
     
+    public static DataStoreImpl getInstance() {
+        if (instance == null) {
+            instance = new DataStoreImpl();
+        }
+        return instance;
+    } 
     
     @Override
     public void createCollection(String collectionName, CollectionDescription collectionDescription,Properties properties) {
@@ -62,8 +74,13 @@ public class DataStoreImpl implements DataStore{
     }
 
     @Override
-    public CollectionObject removeObject(String collectionName, String key) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public CollectionObject removeObject(String collectionName, String key)  throws CollectionNotFoundException {
+        if (this.collections.containsKey(collectionName)) {
+            CollectionObject cObject = this.collections.get(collectionName).removeObject(key);                
+            return cObject;
+        } else {
+            throw new CollectionNotFoundException();
+        }
     }
 
     @Override
@@ -82,6 +99,38 @@ public class DataStoreImpl implements DataStore{
     @Override
     public DSCollection getCollection(String collectionName) {
         return this.collections.get(collectionName);
+    }
+
+    @Override
+    public List<CollectionObject> getByIndex(String collectionName, String indexName, String indexValue) throws IndexNotFoundException,CollectionNotFoundException {
+        if (this.collections.containsKey(collectionName)) {
+            List<CollectionObject> cObjects = this.collections.get(collectionName).getByIndex(indexName, indexValue);                
+            return cObjects;
+        } else {
+            throw new CollectionNotFoundException();
+        }
+
+    }
+
+    @Override
+    public List<CollectionObject> getObjects(String collectionName) throws CollectionNotFoundException {
+        if (this.collections.containsKey(collectionName)) {
+            List<CollectionObject> cObjects = this.collections.get(collectionName).getObjects();                
+            return cObjects;
+        } else {
+            throw new CollectionNotFoundException();
+        }    
+    }
+
+    @Override
+    public List<CollectionObject> getByIndex(String collectionName, Map<String, String> indexMap) throws IndexNotFoundException,CollectionNotFoundException {
+        if (this.collections.containsKey(collectionName)) {
+            List<CollectionObject> cObjects = this.collections.get(collectionName).getByIndex(indexMap);
+            return cObjects;
+        } else {
+            throw new CollectionNotFoundException();
+        }    
+
     }
     
 }

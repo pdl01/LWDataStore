@@ -52,7 +52,7 @@ public class LWDataStoreFactory {
     }
     
     private void initDataStore(DataStoreConfig dsConfig) {
-        dataStore = new DataStoreImpl();
+        dataStore = DataStoreImpl.getInstance();
         
         File dataDir = new File(dsConfig.getDataDir());
         if (!dataDir.exists()) {

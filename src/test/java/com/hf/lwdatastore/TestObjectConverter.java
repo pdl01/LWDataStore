@@ -6,8 +6,11 @@
 package com.hf.lwdatastore;
 
 import com.hf.lwdatastore.exception.AttributeNotFoundException;
+import java.io.IOException;
 import java.util.Map;
+import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.map.ObjectMapper;
 
 /**
  *
@@ -41,6 +44,20 @@ public class TestObjectConverter implements CollectionObjectConverter<TestObject
 
         @Override
         public TestObject convertFromJSONNode(Map.Entry<String, JsonNode> jsonNode) {
+            JsonFactory factory = new JsonFactory();
+            ObjectMapper mapper = new ObjectMapper(factory);
+            JsonNode jsonNodex = mapper.valueToTree(jsonNode);
+            try {
+             TestObject account = mapper.treeToValue(jsonNode.getValue(), TestObject.class);
+                return account;
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            
+            }
+
+        return null;
+
+            /*
             TestObject tObject = new TestObject();
             ;
             String id = jsonNode.getValue().get("id").getTextValue();
@@ -52,8 +69,16 @@ public class TestObjectConverter implements CollectionObjectConverter<TestObject
             
             //System.out.println(id);
             return tObject;
-
+                    */
         }
+
+    @Override
+    public CollectionObject setId(CollectionObject collectionObject, String _id) {
+        ((TestObject)collectionObject.getTarget()).setId(_id);
+        return collectionObject;
+    }
+
+
 
 
        
