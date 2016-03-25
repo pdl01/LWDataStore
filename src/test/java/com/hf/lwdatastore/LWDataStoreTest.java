@@ -17,7 +17,7 @@ public class LWDataStoreTest {
     public DataStoreConfig getConfig() {
         DataStoreConfigImpl dsConfig = new DataStoreConfigImpl();
 
-        dsConfig.setDataDir("/home/pldorrell/.hfw_app/data/test ");
+        dsConfig.setDataDir("/home/pldorrell/.hfw_app/data/test");
 
         CollectionDescriptionImpl collectionDescriptionImpl = new CollectionDescriptionImpl();
         collectionDescriptionImpl.setName("testObject");
