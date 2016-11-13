@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.hf.lwdatastore;
 
 import com.hf.lwdatastore.exception.AttributeNotFoundException;
@@ -25,6 +20,7 @@ import org.apache.log4j.Logger;
  * @author pldorrell
  */
 public class DSCollectionImpl implements DSCollection {
+
     private static final Logger log = Logger.getLogger(DSCollectionImpl.class);
     private Set<String> keyIndex;
     private Map<String, Map<String, Set<String>>> indexes;
@@ -37,6 +33,7 @@ public class DSCollectionImpl implements DSCollection {
     }
 
     public DSCollectionImpl(CollectionDescription collectionDescription) {
+        log.debug("New DSCollection:"+collectionDescription.getName());
         this.collectionDescription = collectionDescription;
     }
 
@@ -79,6 +76,9 @@ public class DSCollectionImpl implements DSCollection {
         try {
             for (String index : this.collectionDescription.getIndexedAttributes()) {
                 String value = converter.getValue(object.getTarget(), index);
+                if (value == null) {
+                    value = "___EMPTY___";
+                }
                 if (this.indexes == null) {
                     this.indexes = new HashMap<String, Map<String, Set<String>>>();
                 }

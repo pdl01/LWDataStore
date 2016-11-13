@@ -56,7 +56,7 @@ public class DiskSyncronizer implements Runnable {
         log.debug("Entering doWork");
         for (CollectionDescription coll : dataStoreConfig.getCollections()) {
             DSCollection dsCollection = dataStore.getCollection(coll.getName());
-            log.debug(coll.getName()+":"+dsCollection.isDirty());
+            log.debug(coll.getName() + ":" + dsCollection.isDirty());
             if (dsCollection != null && dsCollection.isDirty()) {
                 this.writeIndexFile(dsCollection, this.dataStoreConfig.getDataDir());
                 this.writeDataFile(dsCollection, this.dataStoreConfig.getDataDir());
@@ -77,6 +77,7 @@ public class DiskSyncronizer implements Runnable {
             Map<String, Set<String>> index = collection.getIndex(keyName);
             indexMap.put(keyName, index);
         }
+        
         this.writeJsonFile("_indexSet", indexMap, fileName);
         log.debug("Exiting writeIndexFile");
     }
@@ -89,8 +90,8 @@ public class DiskSyncronizer implements Runnable {
         log.debug("Exiting writeDataFile");
     }
 
-    private void writeJsonFile(String rootElement, Object config, String fileName) {
-        log.debug("Entering writeJsonFile");
+    private void writeJsonFile(String rootElement, Object data, String fileName) {
+        log.debug("Entering writeJsonFile"+fileName);
         File outputFile = new File(fileName);
         if (!outputFile.exists()) {
             try {
@@ -100,23 +101,26 @@ public class DiskSyncronizer implements Runnable {
             }
 
         }
-        log.debug("Writing "+outputFile.getName());
+        log.debug("Writing " + outputFile.getName());
         ObjectMapper objectMapper = new ObjectMapper();
         JsonFactory factory = new JsonFactory();
-        HashMap<String, Object> hashMap = new HashMap<String, Object>();
-        hashMap.put(rootElement, config);
-        log.debug("Object:"+config);
-        
+        //HashMap<String, Object> hashMap = new HashMap<String, Object>();
+        //hashMap.put(rootElement, config);
+        log.debug("Object:" + data);
+        //HashMap<String,Object> fileDataMap = new HashMap<>();
+        //fileDataMap.put(rootElement, data);
+        JsonNode jsonNode = null;
         try {
-            JsonNode jsonNode = objectMapper.valueToTree(hashMap);
-            log.debug(jsonNode);
+            jsonNode = objectMapper.valueToTree(data);
+            //log.debug(jsonNode);
             objectMapper.writeValue(outputFile, jsonNode);
         } catch (IOException ex) {
-            log.error(ex);
+            //log.error(ex);
         } catch (Exception e) {
             log.error("Error in writing out jsonNode", e);
+            log.error(jsonNode);
         }
-        log.debug("Exiting writeJSONFile");
+        //log.debug("Exiting writeJSONFile");
     }
 
 }

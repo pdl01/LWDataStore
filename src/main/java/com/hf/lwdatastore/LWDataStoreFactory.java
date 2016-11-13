@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.hf.lwdatastore;
 
 import java.io.File;
@@ -10,6 +5,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import org.apache.log4j.Logger;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonProcessingException;
@@ -20,7 +16,8 @@ import org.codehaus.jackson.map.ObjectMapper;
  * @author pldorrell
  */
 public class LWDataStoreFactory {
-
+    private static final Logger log = Logger.getLogger(LWDataStoreFactory.class);
+    
     private static DataStore dataStore = null;
     private DiskSyncronizer synchronizer;
     public void init() {
@@ -42,8 +39,10 @@ public class LWDataStoreFactory {
 
     }
     public void shutdown() {
-        synchronizer.doWork();
-        //
+        if (synchronizer != null) {
+            synchronizer.doWork();
+        }
+
     }
     public static DataStore getDataStore(){
         return LWDataStoreFactory.dataStore;
@@ -104,16 +103,17 @@ public class LWDataStoreFactory {
             }
         } catch (JsonProcessingException e) {
             // TODO Auto-generated catch block
-            e.printStackTrace();
+            log.error(e);
         } catch (IOException e) {
             // TODO Auto-generated catch block
-            e.printStackTrace();
+            log.error(e);
         }
 
     }
 
     private void readDataFile(DSCollection collection, String dataDir) {
         File file = new File(dataDir + File.separator + collection.getCollectionDescription().getName() + ".data");
+        log.info("Reading:"+file.getPath());
         if (file.exists() && file.canRead()) {
         JsonFactory factory = new JsonFactory();
         ObjectMapper mapper = new ObjectMapper(factory);
@@ -121,12 +121,28 @@ public class LWDataStoreFactory {
             
             
             JsonNode rootNode = mapper.readTree(file);
-            List<JsonNode> dataEntries = rootNode.findValues("_data");
+            System.out.println(rootNode);
             
+            //List<JsonNode> dataEntries = rootNode.findValues("_data");
+            
+            
+            //JsonNode jnode = rootNode.get(0);
             Iterator<Map.Entry<String, JsonNode>> fields = rootNode.getFields();
+            
             while (fields.hasNext()) {
                 Map.Entry<String, JsonNode> field = fields.next();
-                if (field.getKey().equals("_data")) {
+                System.out.println(field.getKey());
+                System.out.println(field.getValue());
+                Object obj = collection.getCollectionDescription().getConverter().convertFromJSONNode(field);
+                CollectionObject cObj = new CollectionObject();
+                cObj.setTarget(obj);
+                collection.putObject(cObj, collection.getCollectionDescription().getConverter());                
+            } 
+/*            
+            while (fields.hasNext()) {
+                
+                Map.Entry<String, JsonNode> field = fields.next();
+                //if (field.getKey().equals("_data")) {
 
                     Iterator<Map.Entry<String, JsonNode>> data_entries = field.getValue().getFields();
                     while (data_entries.hasNext()) {
@@ -137,16 +153,16 @@ public class LWDataStoreFactory {
                         cObj.setTarget(obj);
                         collection.putObject(cObj, collection.getCollectionDescription().getConverter());
                     }
-                }
+                //}
             }
-            
+  */          
             
         } catch (JsonProcessingException e) {
             // TODO Auto-generated catch block
-            e.printStackTrace();
+            log.error(e);
         } catch (IOException e) {
             // TODO Auto-generated catch block
-            e.printStackTrace();
+            log.error(e);
         }
 
             

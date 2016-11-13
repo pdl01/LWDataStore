@@ -1,8 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package com.hf.lwdatastore;
 
 import com.hf.lwdatastore.exception.CollectionNotFoundException;
@@ -11,12 +7,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import org.apache.log4j.Logger;
 
 /**
  *
  * @author pldorrell
  */
 public class DataStoreImpl implements DataStore{
+    private static final Logger log = Logger.getLogger(DataStoreImpl.class);
     private Map<String,DSCollection> collections;
     
     private static DataStoreImpl instance  = null;
@@ -33,11 +31,13 @@ public class DataStoreImpl implements DataStore{
     
     @Override
     public void createCollection(String collectionName, CollectionDescription collectionDescription,Properties properties) {
+        log.debug("createCollection:"+collectionName);
         if (this.collections == null) {
             this.collections = new HashMap<String,DSCollection>();
         }
        DSCollection collection = new DSCollectionImpl(collectionDescription);
        this.collections.put(collectionName, collection);
+        log.debug("leaving createCollection:"+collectionName);
     }
 
     @Override
