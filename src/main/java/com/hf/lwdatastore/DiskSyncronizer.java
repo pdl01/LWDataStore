@@ -60,6 +60,7 @@ public class DiskSyncronizer implements Runnable {
             if (dsCollection != null && dsCollection.isDirty()) {
                 this.writeIndexFile(dsCollection, this.dataStoreConfig.getDataDir());
                 this.writeDataFile(dsCollection, this.dataStoreConfig.getDataDir());
+                dsCollection.completePersistence();
             }
         }
         log.debug("Exiting doWork");
@@ -72,12 +73,13 @@ public class DiskSyncronizer implements Runnable {
 
         HashMap<String, Object> indexMap = new HashMap<String, Object>();
         indexMap.put("_primaryKey", collection.getKeyIndex());
-
-        for (String keyName : collection.getCollectionDescription().getIndexedAttributes()) {
-            Map<String, Set<String>> index = collection.getIndex(keyName);
-            indexMap.put(keyName, index);
+        if (collection.getCollectionDescription().getIndexedAttributes() != null) {
+            for (String keyName : collection.getCollectionDescription().getIndexedAttributes()) {
+                Map<String, Set<String>> index = collection.getIndex(keyName);
+                indexMap.put(keyName, index);
+            }
         }
-        
+
         this.writeJsonFile("_indexSet", indexMap, fileName);
         log.debug("Exiting writeIndexFile");
     }
@@ -91,7 +93,7 @@ public class DiskSyncronizer implements Runnable {
     }
 
     private void writeJsonFile(String rootElement, Object data, String fileName) {
-        log.debug("Entering writeJsonFile"+fileName);
+        log.debug("Entering writeJsonFile" + fileName);
         File outputFile = new File(fileName);
         if (!outputFile.exists()) {
             try {

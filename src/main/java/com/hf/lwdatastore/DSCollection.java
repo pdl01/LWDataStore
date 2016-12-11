@@ -24,4 +24,5 @@ public interface DSCollection {
     public Map<String,Object> getData();
     public List<CollectionObject> getByIndex(String indexName,String indexValue) throws IndexNotFoundException;
     public List<CollectionObject> getByIndex(Map<String,String> indexes) throws IndexNotFoundException;
+    public void completePersistence();
 }

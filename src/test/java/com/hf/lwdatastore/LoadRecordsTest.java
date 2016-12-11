@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.hf.lwdatastore;
 
 import com.hf.lwdatastore.exception.CollectionNotFoundException;
@@ -48,7 +43,7 @@ public class LoadRecordsTest extends LWDataStoreTest {
     // TODO add test methods here.
     // The methods must be annotated with annotation @Test. For example:
     //
-    @Test
+    //@Test
     public void loadRecordsByPK() {
 
         CollectionObject cObject = null;
@@ -63,7 +58,7 @@ public class LoadRecordsTest extends LWDataStoreTest {
        
     }
 
-    @Test
+    //@Test
     public void findRecordsByIndex() {
 
         try {

@@ -2,10 +2,7 @@ package com.hf.lwdatastore;
 
 import com.hf.lwdatastore.exception.AttributeNotFoundException;
 import com.hf.lwdatastore.exception.IndexNotFoundException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,7 +10,6 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
 import org.apache.log4j.Logger;
-
 
 /**
  *
@@ -33,7 +29,7 @@ public class DSCollectionImpl implements DSCollection {
     }
 
     public DSCollectionImpl(CollectionDescription collectionDescription) {
-        log.debug("New DSCollection:"+collectionDescription.getName());
+        log.debug("New DSCollection:" + collectionDescription.getName());
         this.collectionDescription = collectionDescription;
     }
 
@@ -45,11 +41,11 @@ public class DSCollectionImpl implements DSCollection {
     @Override
     public Map<String, Set<String>> getIndex(String name) {
         if (indexes != null) {
-            return indexes.get(name);    
+            return indexes.get(name);
         } else {
             return null;
         }
-        
+
     }
 
     @Override
@@ -72,36 +68,39 @@ public class DSCollectionImpl implements DSCollection {
         //set the id on the object we're going to store
         converter.setId(object, id);
         object.setId(id);
-        
+
         try {
-            for (String index : this.collectionDescription.getIndexedAttributes()) {
-                String value = converter.getValue(object.getTarget(), index);
-                if (value == null) {
-                    value = "___EMPTY___";
-                }
-                if (this.indexes == null) {
-                    this.indexes = new HashMap<String, Map<String, Set<String>>>();
-                }
-                Map<String, Set<String>> indexObjects = this.indexes.get(index);
-                if (indexObjects == null) {
-                    indexObjects = new HashMap<String, Set<String>>();
-                }
+            if (this.collectionDescription.getIndexedAttributes() != null) {
 
-                if (indexObjects.containsKey(value)) {
-                    Set<String> objectForIndex = indexObjects.get(value);
-                    if (objectForIndex == null) {
-                        objectForIndex = new TreeSet<String>();
+                for (String index : this.collectionDescription.getIndexedAttributes()) {
+                    String value = converter.getValue(object.getTarget(), index);
+                    if (value == null) {
+                        value = "___EMPTY___";
                     }
-                    objectForIndex.add(id);
-                    indexObjects.put(value, objectForIndex);
-                    this.indexes.put(index, indexObjects);
-                } else {
-                    Set<String> objectForIndex = new TreeSet<String>();
-                    objectForIndex.add(id);
-                    indexObjects.put(value, objectForIndex);
-                    this.indexes.put(index, indexObjects);
-                }
+                    if (this.indexes == null) {
+                        this.indexes = new HashMap<String, Map<String, Set<String>>>();
+                    }
+                    Map<String, Set<String>> indexObjects = this.indexes.get(index);
+                    if (indexObjects == null) {
+                        indexObjects = new HashMap<String, Set<String>>();
+                    }
 
+                    if (indexObjects.containsKey(value)) {
+                        Set<String> objectForIndex = indexObjects.get(value);
+                        if (objectForIndex == null) {
+                            objectForIndex = new TreeSet<String>();
+                        }
+                        objectForIndex.add(id);
+                        indexObjects.put(value, objectForIndex);
+                        this.indexes.put(index, indexObjects);
+                    } else {
+                        Set<String> objectForIndex = new TreeSet<String>();
+                        objectForIndex.add(id);
+                        indexObjects.put(value, objectForIndex);
+                        this.indexes.put(index, indexObjects);
+                    }
+
+                }
             }
 
         } catch (AttributeNotFoundException e) {
@@ -155,21 +154,21 @@ public class DSCollectionImpl implements DSCollection {
         this.removeKeyFromIndexes(key);
         return null;
     }
-    
+
     protected void removeKeyFromIndexes(String key) {
-       for (String indexName: this.indexes.keySet()) {
-           Map<String,Set<String>> indexMap = this.indexes.get(indexName);
-           if (indexMap != null) {
-               for (String indexValue:indexMap.keySet()) {
-                   Set<String> indexedRecords = indexMap.get(indexValue);
-                   indexedRecords.remove(key);
-                   this.indexes.get(indexName).put(indexValue,indexedRecords);
-                   //TODO remove any index values that have no records
-               }
-           }
-       }
+        for (String indexName : this.indexes.keySet()) {
+            Map<String, Set<String>> indexMap = this.indexes.get(indexName);
+            if (indexMap != null) {
+                for (String indexValue : indexMap.keySet()) {
+                    Set<String> indexedRecords = indexMap.get(indexValue);
+                    indexedRecords.remove(key);
+                    this.indexes.get(indexName).put(indexValue, indexedRecords);
+                    //TODO remove any index values that have no records
+                }
+            }
+        }
     }
-    
+
     @Override
     public CollectionObject[] removeObjects(String... keys) {
         this.dirty = true;
@@ -193,7 +192,7 @@ public class DSCollectionImpl implements DSCollection {
             return objectsToReturn;
         }
         Map<String, Set<String>> indexMap = this.indexes.get(indexName);
-        
+
         if (indexMap == null) {
             throw new IndexNotFoundException();
         }
@@ -216,9 +215,9 @@ public class DSCollectionImpl implements DSCollection {
         ArrayList<CollectionObject> cObjects = new ArrayList<CollectionObject>();
         //get all primary keys
         if (this.keyIndex != null) {
-            for (String key:this.keyIndex) {
+            for (String key : this.keyIndex) {
                 cObjects.add(this.getObject(key));
-            }            
+            }
         }
         return cObjects;
     }
@@ -226,42 +225,46 @@ public class DSCollectionImpl implements DSCollection {
     @Override
     public List<CollectionObject> getByIndex(Map<String, String> indexMap) throws IndexNotFoundException {
         Set<CollectionObject> collectionObjects = new TreeSet<CollectionObject>();
-        List<CollectionObject> a1=null;
+        List<CollectionObject> a1 = null;
         int indexSet = 0;
-        for (String key:indexMap.keySet()){           
-           List<CollectionObject> objects = this.getByIndex(key, indexMap.get(key));
-           if (indexSet == 0) {
-               a1 = new ArrayList<CollectionObject>();
-               a1.addAll(objects);
-               
-           } else {
-               //do an intersection
-               a1 = this.intersect(a1, objects);
-               
-           }
-           indexSet++;
-           //collectionObjects.addAll(objects);
-       }
-        
-       
-       //for uniqueness
-       collectionObjects.addAll(a1);
-       
-       ArrayList<CollectionObject> collectionObjectsToReturn = new ArrayList<CollectionObject>();
-       collectionObjectsToReturn.addAll(collectionObjects);
-       return collectionObjectsToReturn;
+        for (String key : indexMap.keySet()) {
+            List<CollectionObject> objects = this.getByIndex(key, indexMap.get(key));
+            if (indexSet == 0) {
+                a1 = new ArrayList<CollectionObject>();
+                a1.addAll(objects);
+
+            } else {
+                //do an intersection
+                a1 = this.intersect(a1, objects);
+
+            }
+            indexSet++;
+            //collectionObjects.addAll(objects);
+        }
+
+        //for uniqueness
+        collectionObjects.addAll(a1);
+
+        ArrayList<CollectionObject> collectionObjectsToReturn = new ArrayList<CollectionObject>();
+        collectionObjectsToReturn.addAll(collectionObjects);
+        return collectionObjectsToReturn;
     }
-    
+
     private List<CollectionObject> intersect(List<CollectionObject> firstCollection, List<CollectionObject> secondCollection) {
         ArrayList<CollectionObject> a1 = new ArrayList<CollectionObject>();
-        for (CollectionObject co_outer: secondCollection) {
-            for (CollectionObject co_inner:firstCollection) {
-                if (co_outer.getId().equals(co_inner.getId())){
+        for (CollectionObject co_outer : secondCollection) {
+            for (CollectionObject co_inner : firstCollection) {
+                if (co_outer.getId().equals(co_inner.getId())) {
                     a1.add(co_outer);
                 }
             }
         }
         return a1;
     }
-    
+
+    @Override
+    public void completePersistence() {
+        this.dirty = false;
+    }
+
 }

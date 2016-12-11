@@ -3,6 +3,7 @@ package com.hf.lwdatastore;
 import com.hf.lwdatastore.exception.AttributeNotFoundException;
 import java.io.IOException;
 import java.util.Map;
+import org.apache.log4j.Logger;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -12,6 +13,7 @@ import org.codehaus.jackson.map.ObjectMapper;
  * @author pldorrell
  */
 public class TestObjectConverter implements CollectionObjectConverter<TestObject> {
+    private static final Logger log = Logger.getLogger(TestObjectConverter.class);
 
         @Override
         public CollectionObject convertToCollectionObject(TestObject k) {
@@ -39,6 +41,7 @@ public class TestObjectConverter implements CollectionObjectConverter<TestObject
 
         @Override
         public TestObject convertFromJSONNode(Map.Entry<String, JsonNode> jsonNode) {
+            System.out.println("convertFromJSONNode"+jsonNode);
             JsonFactory factory = new JsonFactory();
             ObjectMapper mapper = new ObjectMapper(factory);
             JsonNode jsonNodex = mapper.valueToTree(jsonNode);
