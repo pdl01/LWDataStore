@@ -1,0 +1,4 @@
+This project implements a fairly lightweight java object store. The datastores feature:
+-primary key definition
+-indexed field definition
+-file backed storage
