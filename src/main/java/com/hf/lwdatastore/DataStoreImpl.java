@@ -7,14 +7,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+//import org.apache.log4j.Logger;
 
 /**
  *
  * @author pldorrell
  */
 public class DataStoreImpl implements DataStore{
-    private static final Logger log = Logger.getLogger(DataStoreImpl.class);
+    private static final Logger log = LogManager.getLogger(DataStoreImpl.class);
     private Map<String,DSCollection> collections;
     
     private static DataStoreImpl instance  = null;

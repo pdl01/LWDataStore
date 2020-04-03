@@ -5,7 +5,8 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonProcessingException;
@@ -16,7 +17,7 @@ import org.codehaus.jackson.map.ObjectMapper;
  * @author pldorrell
  */
 public class LWDataStoreFactory {
-    private static final Logger log = Logger.getLogger(LWDataStoreFactory.class);
+    private static final Logger log = LogManager.getLogger(LWDataStoreFactory.class);
     
     private static DataStore dataStore = null;
     private DiskSyncronizer synchronizer;

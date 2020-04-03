@@ -9,7 +9,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+//import org.apache.log4j.Logger;
 
 /**
  *
@@ -17,7 +19,7 @@ import org.apache.log4j.Logger;
  */
 public class DSCollectionImpl implements DSCollection {
 
-    private static final Logger log = Logger.getLogger(DSCollectionImpl.class);
+    private static final Logger log = LogManager.getLogger(DSCollectionImpl.class);
     private Set<String> keyIndex;
     private Map<String, Map<String, Set<String>>> indexes;
     private Map<String, Object> data;
